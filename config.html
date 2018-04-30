@@ -1,0 +1,32 @@
+<?php
+    global $OUTPUT;
+    // set to defaults if undefined
+    if (!isset($config->simplesaml_coderoot)) {
+        $config->simplesaml_coderoot = '/var/www/simplesamlphp';
+    }
+    if (!isset($config->simplesaml_authsource)) {
+        $config->simplesaml_authsource = 'moodle-userpass';
+    }
+?>
+<table cellspacing="0" cellpadding="5" border="0">
+    <tr valign="top" class="required">
+        <td align="right"><label for="simplesaml_coderoot"><?php print_string("coderoot_key", "auth_samlidp") ?></label></td>
+        <td>
+            <input id="simplesaml_coderoot" name="simplesaml_coderoot" type="text" size="60" value="<?php echo $config->simplesaml_coderoot?>" />
+            <?php
+                if (isset($err["simplesaml_coderoot"])) { echo $OUTPUT->error_text($err["simplesaml_coderoot"]); }
+            ?>
+        </td>
+        <td><?php print_string("coderoot_help", "auth_samlidp") ?></td>
+    </tr>
+    <tr valign="top" class="required">
+        <td align="right"><label for="simplesaml_coderoot"><?php print_string("authsource_key", "auth_samlidp") ?></label></td>
+        <td>
+            <input id="simplesaml_authsource" name="simplesaml_authsource" type="text" size="30" value="<?php echo $config->simplesaml_authsource?>" />
+            <?php
+                if (isset($err["simplesaml_authsource"])) { echo $OUTPUT->error_text($err["simplesaml_authsource"]); }
+            ?>
+        </td>
+        <td><?php print_string("authsource_help", "auth_samlidp") ?></td>
+    </tr>
+</table>
