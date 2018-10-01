@@ -21,5 +21,7 @@
  * @copyright  2017 Enovation Solutions (http://enovation.ie)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-session_start();
+if (!session_id()) {
+    session_start();
+}
 sspmod_moodle_Auth_Source_External::resume();

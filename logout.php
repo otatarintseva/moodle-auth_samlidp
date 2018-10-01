@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -41,11 +40,10 @@ if (!isloggedin()) {
     // no confirmation, user has already logged out
     require_logout();
     redirect($redirect);
-
-} 
+}
 
 $authsequence = get_enabled_auth_plugins(); // auths, in sequence
-foreach($authsequence as $authname) {
+foreach ($authsequence as $authname) {
     $authplugin = get_auth_plugin($authname);
     $authplugin->logoutpage_hook();
 }

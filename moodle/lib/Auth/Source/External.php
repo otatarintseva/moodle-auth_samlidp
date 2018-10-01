@@ -24,7 +24,7 @@
 
 ################################################################################
 /*
- * IN config/authsources.php, THIS MUST BE ADDED:
+ * In SimpleSAMLphp, in config/authsources.php, SIMILAR MUST BE ADDED:
  *
  *   'moodle-userpass' => array(
  *       'moodle:External',
@@ -64,7 +64,7 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
             # redirect to a login page
             $state['moodle:AuthID'] = $this->authId;
             $state_id = SimpleSAML_Auth_State::saveState($state, self::STATE_IDENT);
-            $return_to = SimpleSAML_Module::getModuleURL('moodle/resume.php', array( 'State' => $state_id,));
+            $return_to = SimpleSAML_Module::getModuleURL('moodle/resume.php', array('State' => $state_id));
             $auth_page = $this->config{'login_url'} . '?ReturnTo=' . $return_to;
             SimpleSAML_Utilities::redirect($auth_page, array('ReturnTo' => $return_to));
         }
@@ -91,12 +91,12 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
             throw new SimpleSAML_Error_Exception('User not authenticated after login page.');
         }
         $state['Attributes'] = $user;
-        
+
         SimpleSAML_Auth_Source::completeAuth($state);
         exit(); # should never reach here
     }
 
-    private function getUser(&$state) {
+    private function getUser() {
         $uid = 0;
         if (isset($_COOKIE{$this->config{'cookie_name'}}) && $_COOKIE{$this->config{'cookie_name'}}) {
             $str_cookie = $_COOKIE{$this->config{'cookie_name'}};
@@ -104,8 +104,8 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
             # in auth/samlidp/auth.php in Moodle
             $arr_cookie = explode(':', $str_cookie);
 
-            if ((isset($arr_cookie[0]) && $arr_cookie[0]) 
-                && (isset($arr_cookie[1]) && $arr_cookie[1]) 
+            if ((isset($arr_cookie[0]) && $arr_cookie[0])
+                && (isset($arr_cookie[1]) && $arr_cookie[1])
             ) {
                 # make sure no one manipulated the hash or the uid in the cookie before we trust the uid
                 if (sha1($this->config{'cookie_salt'} . $arr_cookie[1]) == $arr_cookie[0]) {
@@ -127,14 +127,23 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
             define('CLI_SCRIPT', true);
             define('WEB_CRON_EMULATED_CLI', 'defined');
             $configphp = $this->config{'moodle_coderoot'}."/config.php";
+            $userlib = $this->config{'moodle_coderoot'}."/user/profile/lib.php";
             if (file_exists($configphp)) {
                 require_once($configphp);
             } else {
                 throw new SimpleSAML_Error_Exception('Moodle app instantiation failure: cannot require()' . $configphp);
             }
 
+            if (file_exists($userlib)) {
+                require_once($userlib);
+            } else {
+                throw new SimpleSAML_Error_Exception('Moodle app instantiation failure: cannot require()' . $userlib);
+            }
+
             # query for a user
             $user = $DB->get_record('user', array('id' => $uid));
+            $profile_fields = profile_user_record($user->id, false);
+
             # simplesaml is somehow expecting a very weird structure in attributes ($user)
             # we also don't reveal user password, auth method, secret
             if ($user) {
@@ -145,6 +154,9 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
                 foreach ((array)$user as $param => $value) {
                     $userattr{$param} = array($value);
                 }
+                foreach ($profile_fields as $param => $value) {
+                    $userattr{'profile_field_'.$param} = array($value);
+                }
             }
             return $userattr;
         } else {
@@ -154,9 +166,9 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
     }
 
     public function logout (&$state) {
-		if (!session_id()) {
-			session_start();
-		}
+        if (!session_id()) {
+            session_start();
+        }
 
         if (isset($_COOKIE{$this->config{'cookie_name'}})) {
             setcookie($this->config{'cookie_name'}, "", time() - 3600, $this->config{'cookie_path'});

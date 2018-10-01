@@ -52,21 +52,22 @@ class auth_plugin_samlidp extends auth_plugin_base {
      * @return void
      */
     public function loginpage_hook () {
-        if (isset($_GET{'ReturnTo'}) && $_GET{'ReturnTo'}) {
+        $returnto = optional_param('ReturnTo', '', PARAM_URL);
+        if ($returnto) {
             if (isloggedin() and !isguestuser()) {
                 # this is a consequent return to Moodle via SAML
                 # it needs to be handled a usual SAML way - create a cookie and redirect to the return address
                 global $USER;
                 $this->set_cookie($USER);
-                header('Location: '. $_GET{'ReturnTo'});
+                header('Location: '. $returnto);
                 exit();
             } else {
                 global $SESSION;
-                $SESSION->samlurl = $_GET{'ReturnTo'};  # record $_GET{'ReturnTo'} as it will not be available later
+                $SESSION->samlurl = $returnto;  # record $returnto as it will not be available later
             }
         }
     }
-    
+
     /**
      * Sets a module-specific cookie to send a user ID to SimpleSAMLphp
      * called from loginpage_hook() and user_authenticated_hook()
@@ -104,7 +105,7 @@ class auth_plugin_samlidp extends auth_plugin_base {
         global $SESSION, $USER;
 
         $this->set_cookie($user);
-    
+
         if (isset($SESSION->samlurl) && $SESSION->samlurl) {
             $samlurl = $SESSION->samlurl;
             unset($SESSION->samlurl);
@@ -159,7 +160,7 @@ class auth_plugin_samlidp extends auth_plugin_base {
      * @return void
      */
     private function report_misconfigured_authsouces () {
-        $msg = sprintf("Misconfigured SimpleSAMLphp IdP (missing configuration block for '%s' in authsources.php, or 'cookie_name' entry in the block) 
+        $msg = sprintf("Misconfigured SimpleSAMLphp IdP (missing configuration block for '%s' in authsources.php, or 'cookie_name' entry in the block)
             or incorrect SAML IdP Moodle module configuration (wrong simplesaml_authsource)", $this->config->simplesaml_authsource);
         trigger_error($msg, E_USER_WARNING);
     }
@@ -170,7 +171,8 @@ class auth_plugin_samlidp extends auth_plugin_base {
      * @return void
      */
     private function report_missing_autoload () {
-        trigger_error("Misconfigured SAML IDP plugin: cannot find a path to SimpleSAMLphp _autoload.php. The current path is incorrect: " . $this->simplesamlAutoloadPhp, E_USER_WARNING);
+        trigger_error("Misconfigured SAML IDP plugin: cannot find a path to SimpleSAMLphp _autoload.php. The current path is incorrect: ".
+                $this->simplesamlAutoloadPhp, E_USER_WARNING);
     }
 
 
@@ -272,40 +274,5 @@ class auth_plugin_samlidp extends auth_plugin_base {
      */
     public function can_reset_password() {
         return false;
-    }
-
-    /**
-     * Prints a form for configuring this authentication plugin.
-     *
-     * This function is called from admin/auth.php, and outputs a full page with
-     * a form for configuring this plugin.
-     *
-     * @param stdClass $config
-     * @param array $err errors
-     * @param array $userFields
-     * @return void
-     */
-    public function config_form($config, $err, $userFields) {
-        include('config.html');
-    }
-
-    /**
-     * Processes and stores configuration data for this authentication plugin.
-     *
-     * @param srdClass $config
-     * @return bool always true or exception
-     */
-    public function process_config($config) {
-        if (!isset($config->simplesaml_coderoot)) {
-            $config->simplesaml_coderoot = '/var/www/simplesamlphp';
-        }
-        if (!isset($config->simplesaml_authsource)) {
-            $config->simplesaml_authsource = 'moodle-userpass';
-        }
-
-        set_config('simplesaml_coderoot', $config->simplesaml_coderoot, self::COMPONENT_NAME);
-        set_config('simplesaml_authsource', $config->simplesaml_authsource, self::COMPONENT_NAME);
-
-        return true;
     }
 }

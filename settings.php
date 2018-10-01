@@ -15,15 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Admin settings and defaults.
  *
  * @package    auth_samlidp
- * @copyright  2017 Enovation Solutions (http://enovation.ie)
+ * @copyright  2018 Enovation Solutions (http://enovation.ie)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2018061302;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2016051900;        // Requires this Moodle version.
-$plugin->component = 'auth_samlidp';    // Full name of the plugin (used for diagnostics).
+if ($ADMIN->fulltree) {
+
+    // Path to SimpleSAMLphp code  root
+    $settings->add(new admin_setting_configtext('auth_samlidp/simplesaml_coderoot',
+            get_string('coderoot_key', 'auth_samlidp'),
+            get_string('coderoot_help', 'auth_samlidp'), '', PARAM_PATH, 48));
+
+    // authsource
+    $settings->add(new admin_setting_configtext('auth_samlidp/simplesaml_authsource',
+            get_string('authsource_key', 'auth_samlidp'),
+            get_string('authsource_help', 'auth_samlidp'), 'moodle-userpass', PARAM_ALPHANUMEXT));
+
+}
