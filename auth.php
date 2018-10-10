@@ -124,6 +124,7 @@ class auth_plugin_samlidp extends auth_plugin_base {
     public function postlogout_hook($user) {
         global $OUTPUT;
         if (file_exists($this->simplesamlAutoloadPhp)) {
+            $returnto = optional_param('ReturnTo', '', PARAM_URL);
             require_once($this->simplesamlAutoloadPhp);
             $sspConfig = SimpleSAML_Configuration::getInstance();
             $sspAuthsources = SimpleSAML_Configuration::getConfig('authsources.php');
@@ -142,8 +143,8 @@ class auth_plugin_samlidp extends auth_plugin_base {
                         $params['secure'], $params['httponly']
                     );
                 }
-                if (isset($_GET{'ReturnTo'}) && $_GET{'ReturnTo'}) {
-                    header('Location: '.$_GET{'ReturnTo'});
+                if ($returnto) {
+                    header('Location: '.$returnto);
                     exit();
                 }
             } else {
