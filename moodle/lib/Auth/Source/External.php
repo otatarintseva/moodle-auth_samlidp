@@ -100,7 +100,7 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
         $uid = 0;
         if (isset($_COOKIE{$this->config{'cookie_name'}}) && $_COOKIE{$this->config{'cookie_name'}}) {
             $str_cookie = $_COOKIE{$this->config{'cookie_name'}};
-            # cookie created by: "setcookie($cookieName{'cookie_name'}, sha1($salt . $uid).':'.$uid, 0, $sspConfig->getValue('session.cookie.path'));"
+            # cookie created by: "setcookie($cookieName{'cookie_name'}, hash_hmac('sha1', $salt.$account->uid, $salt).':'.$uid, 0, $sspConfig->getValue('session.cookie.path'));"
             # in auth/samlidp/auth.php in Moodle
             $arr_cookie = explode(':', $str_cookie);
 
@@ -108,7 +108,7 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
                 && (isset($arr_cookie[1]) && $arr_cookie[1])
             ) {
                 # make sure no one manipulated the hash or the uid in the cookie before we trust the uid
-                if (sha1($this->config{'cookie_salt'} . $arr_cookie[1]) == $arr_cookie[0]) {
+                if (hash_hmac('sha1', $this->config{'cookie_salt'}.$arr_cookie[1], $this->config{'cookie_salt'}) == $arr_cookie[0]) {
                     $uid = (int)$arr_cookie[1];
                 } else {
                     throw new SimpleSAML_Error_Exception('Cookie hash invalid.');
