@@ -78,13 +78,13 @@ class auth_plugin_samlidp extends auth_plugin_base {
     private function set_cookie ($user) {
         if (file_exists($this->simplesamlAutoloadPhp)) {
             require_once($this->simplesamlAutoloadPhp);
-            $sspConfig = SimpleSAML_Configuration::getInstance();
-            $sspAuthsources = SimpleSAML_Configuration::getConfig('authsources.php');
+            $sspConfig = SimpleSAML\Configuration::getInstance();
+            $sspAuthsources = SimpleSAML\Configuration::getConfig('authsources.php');
             $cookieName = $sspAuthsources->getValue($this->config->simplesaml_authsource);
             $uid = $user->id;
-            if ($cookieName && isset($cookieName{'cookie_name'}) && $cookieName{'cookie_name'}) {
+            if ($cookieName && isset($cookieName['cookie_name']) && $cookieName['cookie_name']) {
                 $salt = $sspConfig->getValue('secretsalt');
-                setcookie($cookieName{'cookie_name'}, hash_hmac('sha1', $salt.$uid, $salt).':'.$uid, 0, $sspConfig->getValue('session.cookie.path'));
+                setcookie($cookieName['cookie_name'], hash_hmac('sha1', $salt.$uid, $salt).':'.$uid, 0, $sspConfig->getValue('session.cookie.path'));
             } else {
                 $this->report_misconfigured_authsouces();
             }
@@ -104,9 +104,8 @@ class auth_plugin_samlidp extends auth_plugin_base {
     public function user_authenticated_hook (&$user, $username, $password) {
         global $SESSION, $USER;
 
-        $this->set_cookie($user);
-
         if (isset($SESSION->samlurl) && $SESSION->samlurl) {
+            $this->set_cookie($user);
             $samlurl = $SESSION->samlurl;
             unset($SESSION->samlurl);
             complete_user_login($user);     # need to run it here otherwise the moodle user is not really logged in
@@ -126,12 +125,12 @@ class auth_plugin_samlidp extends auth_plugin_base {
         if (file_exists($this->simplesamlAutoloadPhp)) {
             $returnto = optional_param('ReturnTo', '', PARAM_URL);
             require_once($this->simplesamlAutoloadPhp);
-            $sspConfig = SimpleSAML_Configuration::getInstance();
-            $sspAuthsources = SimpleSAML_Configuration::getConfig('authsources.php');
+            $sspConfig = SimpleSAML\Configuration::getInstance();
+            $sspAuthsources = SimpleSAML\Configuration::getConfig('authsources.php');
             $cookieName = $sspAuthsources->getValue($this->config->simplesaml_authsource);
-            if ($cookieName && isset($cookieName{'cookie_name'}) && $cookieName{'cookie_name'}) {
+            if ($cookieName && isset($cookieName['cookie_name']) && $cookieName['cookie_name']) {
 
-                setcookie($cookieName{'cookie_name'}, '',  time() - 3600, $sspConfig->getValue('session.cookie.path'));
+                setcookie($cookieName['cookie_name'], '',  time() - 3600, $sspConfig->getValue('session.cookie.path'));
 
                 if (ini_get('session.use_cookies')) {
                     $params = session_get_cookie_params();
