@@ -41,8 +41,8 @@ class sspmod_moodle_Auth_Source_External extends SimpleSAML_Auth_Source {
     private $config;
 
     public function __construct($info, $config) {
-        assert('is_array($info)');
-        assert('is_array($config)');
+        assert(is_array($info));
+        assert(is_array($config));
 
         parent::__construct($info, $config);
         if (!isset($config{'cookie_name'})) {
