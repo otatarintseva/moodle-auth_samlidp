@@ -15,13 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * SimplSAMLphp module file
+ * SimplSAMLphp resume file
  *
  * @package    auth_samlidp
  * @copyright  2017 Enovation Solutions (http://enovation.ie)
+ * @copyright  2024 Enovation Solutions (http://enovation.ie)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 if (!session_id()) {
     session_start();
 }
-sspmod_moodle_Auth_Source_External::resume();
+\SimpleSAML\Module\moodle\Auth\Source\External::resume();
